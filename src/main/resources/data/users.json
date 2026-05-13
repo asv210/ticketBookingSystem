@@ -1,0 +1,77 @@
+[
+  {
+    "userId": "U101",
+    "name": "Apar Solanki",
+    "password": "apar123",
+    "hashPassword": "$2a$10$hashedAparPassword",
+    "ticketBooked": [
+      {
+        "ticketId": "T1001",
+        "userId": "U101",
+        "source": "Mumbai",
+        "destination": "Delhi",
+        "dateOfTravel": "2026-05-20T10:30:00",
+        "train": {
+          "trainId": "TR001",
+          "trainNo": "12951",
+          "seats": [
+            [1, 1, 0, 1],
+            [1, 0, 1, 1]
+          ],
+          "stationTime": {
+            "Mumbai": "2026-05-20T08:00:00",
+            "Surat": "2026-05-20T11:00:00",
+            "Vadodara": "2026-05-20T13:00:00",
+            "Delhi": "2026-05-21T06:00:00"
+          },
+          "listOfStations": [
+            "Mumbai",
+            "Surat",
+            "Vadodara",
+            "Delhi"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "userId": "U102",
+    "name": "Rahul Sharma",
+    "password": "rahul@123",
+    "hashPassword": "$2a$10$hashedRahulPassword",
+    "ticketBooked": [
+      {
+        "ticketId": "T1002",
+        "userId": "U102",
+        "source": "Pune",
+        "destination": "Nagpur",
+        "dateOfTravel": "2026-06-10T14:00:00",
+        "train": {
+          "trainId": "TR002",
+          "trainNo": "11057",
+          "seats": [
+            [1, 1, 1, 1],
+            [1, 1, 0, 0]
+          ],
+          "stationTime": {
+            "Pune": "2026-06-10T09:00:00",
+            "Nashik": "2026-06-10T12:00:00",
+            "Nagpur": "2026-06-11T02:00:00"
+          },
+          "listOfStations": [
+            "Pune",
+            "Nashik",
+            "Nagpur"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "userId": "U103",
+    "name": "Priya Patel",
+    "password": "priya456",
+    "hashPassword": "$2a$10$hashedPriyaPassword",
+    "ticketBooked": []
+  }
+]
