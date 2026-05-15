@@ -1,4 +1,14 @@
 package com.darkSProject.ticketBooking.exception;
 
-public class ApiErrorRespone {
-}
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+
+public record ApiErrorRespone(
+        LocalDateTime localDateTime,
+        int status,
+        String error,
+        String message
+
+){}

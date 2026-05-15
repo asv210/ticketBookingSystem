@@ -1,7 +1,6 @@
 package com.darkSProject.ticketBooking.controller;
 
-import com.darkSProject.ticketBooking.dto.AuthResponseDTO;
-import com.darkSProject.ticketBooking.dto.SignupRequestDTO;
+import com.darkSProject.ticketBooking.dto.*;
 import com.darkSProject.ticketBooking.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,13 +17,20 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponseDTO> signup(@RequestBody SignupRequestDTO requestDTO){
-        String response= userService.signUp(requestDTO);
+    public ResponseEntity signup(@RequestBody SignupRequestDTO requestDTO){
+        ApiResponse response= userService.signUp(requestDTO);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        new AuthResponseDTO(response)
+                        response
                 );
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody LoginRequestDTO loginRequestDTO){
+        ApiResponse loginResponseDTO=userService.login(loginRequestDTO);
+        return ResponseEntity
+                .ok(loginResponseDTO);
     }
 
 }

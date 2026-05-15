@@ -1,13 +1,8 @@
 package com.darkSProject.ticketBooking.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class LoginRequestDTO {
+public record LoginRequestDTO(
+        String email,
 
-    private String name;
-
-    private String password;
-}
+        String password
+) {}

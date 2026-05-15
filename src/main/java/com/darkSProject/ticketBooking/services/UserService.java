@@ -1,8 +1,11 @@
 package com.darkSProject.ticketBooking.services;
 
-import com.darkSProject.ticketBooking.dto.AuthResponseDTO;
-import com.darkSProject.ticketBooking.dto.SignupRequestDTO;
+import com.darkSProject.ticketBooking.dto.*;
 import com.darkSProject.ticketBooking.entities.User;
+import com.darkSProject.ticketBooking.exception.InvalidCredentialsException;
+import com.darkSProject.ticketBooking.exception.UserNotFoundException;
+import com.darkSProject.ticketBooking.factory.UserFactory;
+import com.darkSProject.ticketBooking.jwt.JwtService;
 import com.darkSProject.ticketBooking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,16 +20,54 @@ public class UserService {
 
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public String signUp(SignupRequestDTO requestDTO){
+    private final UserFactory userFactory;
+    private final JwtService jwtService;
 
-        User user = new User();
-        user.setName(requestDTO.getName());
+    public ApiResponse<SignupResponseDTO> signUp(SignupRequestDTO requestDTO){
 
-        user.setHashPassword(passwordEncoder.encode(requestDTO.getPassword()));
+        User user = userFactory.createUser(requestDTO,passwordEncoder);
 
         userRepository.save(user);
 
-        return "User Registered Successfully";
+        return ApiResponse.<SignupResponseDTO>builder()
+                .data(
+                        SignupResponseDTO.builder()
+                                .userId(user.getUserId())
+                                .userName(user.getName())
+                                .email(user.getEmail())
+                                .build()
+                )
+                .success(true)
+                .message("User Created Successfully")
+                .build();
 
+    }
+
+    public ApiResponse login(
+            LoginRequestDTO loginRequestDTO
+    ){
+        User user = userRepository
+                .findByEmail(loginRequestDTO.email())
+                .orElseThrow(
+                        UserNotFoundException::new
+                );
+
+        boolean isPasswordCorrect = passwordEncoder
+                .matches(
+                        loginRequestDTO.password(),
+                        user.getHashPassword()
+                );
+        if(!isPasswordCorrect){
+            throw new InvalidCredentialsException();
+        }
+        String token = jwtService.generateToken(user.getEmail());
+        return ApiResponse.<LoginResponseDTO>builder()
+                .data(
+                        LoginResponseDTO.builder()
+                                .token(token)
+                                .build()
+                ).message("Login Successful")
+                .success(true)
+                .build();
     }
 }

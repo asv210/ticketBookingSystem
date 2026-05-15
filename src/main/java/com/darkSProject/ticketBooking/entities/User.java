@@ -1,13 +1,11 @@
 package com.darkSProject.ticketBooking.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
+@Builder
 @Entity
 @Getter
 @Setter
@@ -22,4 +20,6 @@ public class User {
     private String hashPassword;
     @OneToMany(mappedBy = "user")
     private List<Ticket> ticketBooked;
+    @Column(unique = true)
+    private String email;
 }

@@ -1,4 +1,9 @@
 package com.darkSProject.ticketBooking.dto;
 
-public class LoginResponseDTO {
+import lombok.Builder;
+
+@Builder
+public record LoginResponseDTO(
+        String token
+) {
 }

@@ -12,14 +12,24 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "trains")
 public class Train {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String trainId;
+
+    @Column(unique = true)
     private String trainNo;
-    @OneToMany(mappedBy = "train")
+    private String trainName;
+    @OneToMany(
+            mappedBy = "train",
+            cascade = CascadeType.ALL
+    )
     private List<Seat> seats;
-    @OneToMany(mappedBy = "train")
+    @OneToMany(
+            mappedBy = "train",
+            cascade = CascadeType.ALL
+    )
     private List<StationSchedule> schedules;
 }
