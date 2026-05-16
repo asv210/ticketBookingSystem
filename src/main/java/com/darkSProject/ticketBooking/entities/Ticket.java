@@ -17,6 +17,7 @@ public class Ticket {
     private String ticketId;
     private String source;
     private String destination;
+    private Date dateOfTravel;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

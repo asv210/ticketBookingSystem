@@ -7,6 +7,7 @@ import com.darkSProject.ticketBooking.exception.UserNotFoundException;
 import com.darkSProject.ticketBooking.factory.UserFactory;
 import com.darkSProject.ticketBooking.jwt.JwtService;
 import com.darkSProject.ticketBooking.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class UserService {
 
     private final UserFactory userFactory;
     private final JwtService jwtService;
-
+    @Transactional
     public ApiResponse<SignupResponseDTO> signUp(SignupRequestDTO requestDTO){
 
         User user = userFactory.createUser(requestDTO,passwordEncoder);
