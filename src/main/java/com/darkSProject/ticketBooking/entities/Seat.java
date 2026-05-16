@@ -3,6 +3,8 @@ package com.darkSProject.ticketBooking.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "seats")
 @Getter
@@ -23,4 +25,9 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "train_id")
     private Train train;
+    @OneToMany(
+            mappedBy = "seat",
+    cascade = CascadeType.ALL
+    )
+    private List<SeatBooking> bookings;
 }

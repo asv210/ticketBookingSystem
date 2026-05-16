@@ -1,7 +1,14 @@
 package com.darkSProject.ticketBooking.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class InvalidCredentialsException extends AppException{
-    public InvalidCredentialsException(){
-        super(ErrorCode.INVALID_CREDENTIALS);
+    public InvalidCredentialsException(String messsage, ErrorCode errorCode){
+
+        super(
+                messsage,
+                HttpStatus.UNAUTHORIZED,
+                errorCode
+        );
     }
 }

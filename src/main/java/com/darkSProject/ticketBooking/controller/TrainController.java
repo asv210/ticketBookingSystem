@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/trains")
+@RequestMapping("/api/trains")
 public class TrainController {
     private final TrainService trainService;
 

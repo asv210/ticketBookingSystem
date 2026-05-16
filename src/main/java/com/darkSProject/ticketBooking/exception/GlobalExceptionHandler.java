@@ -17,13 +17,13 @@ public class GlobalExceptionHandler {
 
         ApiErrorResponse apiErrorResponse = new ApiErrorResponse(
                 LocalDateTime.now(),
-                errorCode.getHttpStatus().value(),
+                ex.getHttpStatus().value(),
                 errorCode.name(),
-                errorCode.getMessage()
+                ex.getMessage()
 
         );
         return ResponseEntity
-                .status(errorCode.getHttpStatus())
+                .status(ex.getHttpStatus())
                 .body(apiErrorResponse);
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)

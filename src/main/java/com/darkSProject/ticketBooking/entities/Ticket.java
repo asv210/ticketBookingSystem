@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
+@Builder
 @Entity
 @Getter
 @Setter
@@ -24,4 +26,9 @@ public class Ticket {
     @ManyToOne
     @JoinColumn(name = "train_id")
     private Train train;
+    @OneToMany(
+            mappedBy = "ticket",
+            cascade = CascadeType.ALL
+    )
+    private List<SeatBooking> seatBookings;
 }

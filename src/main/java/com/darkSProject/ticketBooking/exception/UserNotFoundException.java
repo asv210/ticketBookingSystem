@@ -1,7 +1,14 @@
 package com.darkSProject.ticketBooking.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class UserNotFoundException extends AppException{
-    public UserNotFoundException(){
-        super(ErrorCode.USER_NOT_FOUND);
+    public UserNotFoundException(String messsage, ErrorCode errorCode){
+
+        super(
+                messsage,
+                HttpStatus.UNAUTHORIZED,
+                errorCode
+        );
     }
 }

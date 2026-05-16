@@ -32,4 +32,6 @@ public class Train {
             cascade = CascadeType.ALL
     )
     private List<StationSchedule> schedules;
+
+
 }

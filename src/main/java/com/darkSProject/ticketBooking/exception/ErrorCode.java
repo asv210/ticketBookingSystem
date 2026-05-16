@@ -6,37 +6,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
-    USER_NOT_FOUND(
-            HttpStatus.NOT_FOUND,
-            "User not found"
-    ),
-    INVALID_CREDENTIALS(
-            HttpStatus.UNAUTHORIZED,
-            "Invalid credentials"
-    ),
+    USER_NOT_FOUND,
+    INVALID_CREDENTIALS,
+    TRAIN_NOT_EXIST,
+    TRAIN_EXISTS,
+    SEATS_UNAVAILABLE,
+    INVALID_ROUTE
 
-    TRAIN_NOT_FOUND(
-            HttpStatus.NOT_FOUND,
-            "Train not found"
-    ),
-
-    SEAT_UNAVAILABLE(
-            HttpStatus.BAD_REQUEST,
-            "Seat unavailable"
-    ),
-    TRAIN_EXISTS(
-            HttpStatus.BAD_REQUEST,
-            "Train number already exists"
-    );
-    private final HttpStatus httpStatus;
-    private final String message;
-
-    ErrorCode(
-            HttpStatus httpStatus,
-            String message
-    ){
-        this.httpStatus=httpStatus;
-        this.message=message;
-    }
 
 }

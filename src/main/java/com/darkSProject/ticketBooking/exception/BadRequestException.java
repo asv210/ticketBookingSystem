@@ -5,9 +5,11 @@ import org.springframework.http.HttpStatus;
 public class BadRequestException
         extends AppException {
 
-    public BadRequestException() {
+    public BadRequestException(String message,ErrorCode errorCode) {
         super(
-               ErrorCode.TRAIN_EXISTS
+                message,
+               HttpStatus.BAD_REQUEST,
+               errorCode
         );
     }
 }

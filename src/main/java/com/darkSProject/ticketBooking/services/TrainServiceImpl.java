@@ -3,6 +3,7 @@ package com.darkSProject.ticketBooking.services;
 import com.darkSProject.ticketBooking.dto.*;
 import com.darkSProject.ticketBooking.entities.Train;
 import com.darkSProject.ticketBooking.exception.BadRequestException;
+import com.darkSProject.ticketBooking.exception.ErrorCode;
 import com.darkSProject.ticketBooking.factory.TrainFactory;
 import com.darkSProject.ticketBooking.repository.TrainRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class TrainServiceImpl implements TrainService{
                 request.trainNumber()
         )) {
 
-            throw new BadRequestException();
+            throw new BadRequestException("TrainNo Already Exists", ErrorCode.TRAIN_EXISTS);
         }
         trainRepository.save(train);
         return  ApiResponse .<AddTrainResponseDTO>builder().data(

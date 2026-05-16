@@ -1,14 +1,35 @@
 package com.darkSProject.ticketBooking.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.darkSProject.ticketBooking.dto.ApiResponse;
+import com.darkSProject.ticketBooking.dto.BookTicketRequestDTO;
+import com.darkSProject.ticketBooking.dto.TicketResponseDTO;
+import com.darkSProject.ticketBooking.services.TicketService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/tickets")
+@RequestMapping("/api/tickets")
+@RequiredArgsConstructor
 public class TicketController {
-    @GetMapping("/my-bookings")
-    public String myBookings(){
-        return "Protected Route Accessed";
+    private final TicketService ticketService;
+
+    @PostMapping("/book")
+    public ResponseEntity<ApiResponse<TicketResponseDTO>>
+    bookTicket(
+
+            @Valid
+            @RequestBody
+            BookTicketRequestDTO request
+    ) {
+
+        ApiResponse<TicketResponseDTO> response =
+
+                ticketService.bookTicket(
+                        request
+                );
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,6 +2,7 @@ package com.darkSProject.ticketBooking.services;
 
 import com.darkSProject.ticketBooking.dto.*;
 import com.darkSProject.ticketBooking.entities.User;
+import com.darkSProject.ticketBooking.exception.ErrorCode;
 import com.darkSProject.ticketBooking.exception.InvalidCredentialsException;
 import com.darkSProject.ticketBooking.exception.UserNotFoundException;
 import com.darkSProject.ticketBooking.factory.UserFactory;
@@ -49,8 +50,9 @@ public class UserService {
     ){
         User user = userRepository
                 .findByEmail(loginRequestDTO.email())
-                .orElseThrow(
-                        UserNotFoundException::new
+                .orElseThrow(()->{
+                            throw new UserNotFoundException("User Not Found", ErrorCode.USER_NOT_FOUND);
+                        }
                 );
 
         boolean isPasswordCorrect = passwordEncoder
@@ -59,7 +61,7 @@ public class UserService {
                         user.getHashPassword()
                 );
         if(!isPasswordCorrect){
-            throw new InvalidCredentialsException();
+            throw new InvalidCredentialsException("Invalid credentials",ErrorCode.INVALID_CREDENTIALS);
         }
         String token = jwtService.generateToken(user.getEmail());
         return ApiResponse.<LoginResponseDTO>builder()
