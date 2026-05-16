@@ -23,6 +23,10 @@ public enum ErrorCode {
     SEAT_UNAVAILABLE(
             HttpStatus.BAD_REQUEST,
             "Seat unavailable"
+    ),
+    TRAIN_EXISTS(
+            HttpStatus.BAD_REQUEST,
+            "Train number already exists"
     );
     private final HttpStatus httpStatus;
     private final String message;

@@ -4,6 +4,7 @@ import com.darkSProject.ticketBooking.dto.AddTrainRequestDTO;
 import com.darkSProject.ticketBooking.dto.AddTrainResponseDTO;
 import com.darkSProject.ticketBooking.dto.ApiResponse;
 import com.darkSProject.ticketBooking.services.TrainService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class TrainController {
 
     @PostMapping("/add-train")
     public ResponseEntity<ApiResponse<AddTrainResponseDTO>> addTrain(
-            @RequestBody AddTrainRequestDTO request
+            @Valid @RequestBody AddTrainRequestDTO request
     ){
         ApiResponse<AddTrainResponseDTO> response=trainService.addTrain(request);
         return ResponseEntity
