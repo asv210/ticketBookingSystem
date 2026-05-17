@@ -11,16 +11,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @Getter
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {
-                                "seat_id",
-                                "date_of_travel"
-                        }
-                )
-        }
-)
+@Table
 @Entity
 @NoArgsConstructor
 public class SeatBooking {

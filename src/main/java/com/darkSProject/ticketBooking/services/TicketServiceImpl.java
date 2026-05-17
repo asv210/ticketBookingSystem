@@ -91,6 +91,17 @@ public class TicketServiceImpl implements TicketService{
                                 ErrorCode.INVALID_ROUTE
                         )
                 ).getStationOrder();
+        if(sourceOrder > destinationOrder) {
+            throw new BadRequestException(
+                    "Invalid route selected",
+                    ErrorCode.INVALID_ROUTE
+            );
+        }else if(sourceOrder==destinationOrder){
+            throw new BadRequestException(
+                    "Source and destination cannot be same",
+                     ErrorCode.INVALID_ROUTE
+            );
+        }
         List<Seat> seats = seatRepository.findAvailableSeats(
                 train.getTrainId(),
                 request.dateOfTravel(),
@@ -120,6 +131,10 @@ public class TicketServiceImpl implements TicketService{
                                                     .ticket(ticket)
                                                     .train(train)
                                                     .dateOfTravel(request.dateOfTravel())
+                                                    .source(request.source())
+                                                    .destination(request.destination())
+                                                    .destinationOrder(destinationOrder)
+                                                    .sourceOrder(sourceOrder)
                                                     .build();
                                     return seatBooking;
                                 }

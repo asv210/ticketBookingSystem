@@ -3,6 +3,7 @@ package com.darkSProject.ticketBooking.repository;
 import com.darkSProject.ticketBooking.dto.SearchTrainResponseDTO;
 import com.darkSProject.ticketBooking.dto.TrainSearchProjection;
 import com.darkSProject.ticketBooking.entities.Train;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,20 +20,26 @@ public interface TrainRepository extends JpaRepository<Train,String> {
     boolean existsByTrainNo(String trainNo);
     @Query("""
 
-SELECT 
+SELECT
 
-    t.trainId,
+    
 
-    t.trainNo,
+        t.trainId,
 
-    t.trainName,
+        t.trainNo,
 
-    (
-        COUNT(DISTINCT s)
-        -
-        COUNT(DISTINCT tk)
-    )
+        t.trainName,
 
+        (
+
+            COUNT(DISTINCT s)
+
+            -
+
+            COUNT(DISTINCT sb.seat)
+
+        )
+    
 
 FROM Train t
 
@@ -42,9 +49,23 @@ JOIN t.schedules destinationStation
 
 LEFT JOIN t.seats s
 
-LEFT JOIN Ticket tk
-    ON tk.train = t
-    AND tk.dateOfTravel = :date
+LEFT JOIN SeatBooking sb
+
+    ON sb.train = t
+
+    AND sb.dateOfTravel = :date
+
+    AND sb.bookingStatus =
+        com.darkSProject.ticketBooking.entities.BookingStatus.BOOKED
+
+    AND (
+
+        sb.sourceOrder < destinationStation.stationOrder
+
+        AND
+
+        sb.destinationOrder > sourceStation.stationOrder
+    )
 
 WHERE
 
