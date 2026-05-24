@@ -1,16 +1,15 @@
 package com.darkSProject.ticketBooking.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 @Builder
 @AllArgsConstructor
 @Getter
+@Setter
 @Table
 @Entity
 @NoArgsConstructor

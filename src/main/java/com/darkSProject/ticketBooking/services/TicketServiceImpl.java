@@ -12,6 +12,8 @@ import com.darkSProject.ticketBooking.repository.SeatRepository;
 import com.darkSProject.ticketBooking.repository.TicketRepository;
 import com.darkSProject.ticketBooking.repository.TrainRepository;
 import com.darkSProject.ticketBooking.repository.UserRepository;
+import com.darkSProject.ticketBooking.services.validation.TicketValidationService;
+import com.darkSProject.ticketBooking.services.validation.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,33 +33,14 @@ public class TicketServiceImpl implements TicketService{
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
     private final TicketRepository ticketRepository;
-
+    private final UserValidationService userValidationService;
+    private final TicketValidationService ticketValidationService;
     @Transactional
     @Override
     public ApiResponse<TicketResponseDTO> bookTicket(
             BookTicketRequestDTO request
     ){
-        Authentication authentication =
-
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
-        String userEmail= authentication.getName();
-        if(userEmail==null){
-            throw new UserNotFoundException("User is not loggedIn",ErrorCode.USER_NOT_FOUND);
-        }
-        User user =
-
-                userRepository
-                        .findByEmail(userEmail)
-
-                        .orElseThrow(() ->
-
-                                new UserNotFoundException(
-                                        "User not found",
-                                        ErrorCode.USER_NOT_FOUND
-                                )
-                        );
+        User user = userValidationService.getCurrentUser();
         Train train = trainRepository.findByTrainNo(request.trainNo())
                 .orElseThrow(()->{
                          throw new BadRequestException("TrainNo not exists", ErrorCode.TRAIN_NOT_EXIST);
@@ -166,5 +149,35 @@ public class TicketServiceImpl implements TicketService{
                    .success(true)
                    .message("Ticket booked successfully")
                     .build();
+    }
+
+    @Override
+    public ApiResponse<String> cancelTicket(String ticketId) {
+        User user= userValidationService.getCurrentUser();
+        Ticket ticket=ticketValidationService.validateTicketOwnerShip(
+                ticketId,
+                user
+        );
+        if (ticket.getStatus()==TicketStatus.CANCELLED){
+            throw new BadRequestException(
+
+                    "Ticket already cancelled",
+
+                    ErrorCode.TICKET_ALREADY_CANCELLED
+            );
+        }
+        ticket.getSeatBookings()
+                .forEach(
+                        seatBooking ->
+                                seatBooking.setBookingStatus(
+                                  BookingStatus.CANCELLED
+                                )
+                );
+        ticket.setStatus(TicketStatus.CANCELLED);
+        ticketRepository.save(ticket);
+        return ApiResponse.success(
+                "Ticket Successfully Deleted",
+                null
+        );
     }
 }

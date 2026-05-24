@@ -31,4 +31,7 @@ public class Ticket {
             cascade = CascadeType.ALL
     )
     private List<SeatBooking> seatBookings;
+    @Enumerated(EnumType.STRING)
+    private TicketStatus status;
+
 }

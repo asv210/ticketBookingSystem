@@ -8,4 +8,7 @@ public interface TicketService {
     public ApiResponse<TicketResponseDTO> bookTicket(
         BookTicketRequestDTO request
     );
+    public ApiResponse<String> cancelTicket(
+            String ticketId
+    );
 }

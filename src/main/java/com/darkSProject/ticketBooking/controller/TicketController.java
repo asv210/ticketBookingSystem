@@ -6,6 +6,7 @@ import com.darkSProject.ticketBooking.dto.TicketResponseDTO;
 import com.darkSProject.ticketBooking.services.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,4 +33,15 @@ public class TicketController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/cancel/{ticketId}")
+    public ResponseEntity<ApiResponse<String>>cancelTicket(@RequestParam String ticketId){
+
+        ApiResponse<String> response=
+                ticketService.cancelTicket(ticketId);
+       return ResponseEntity
+               .status(HttpStatus.NO_CONTENT)
+               .body(response);
+    }
+
 }

@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +20,6 @@ public interface TrainRepository extends JpaRepository<Train,String> {
     @Query("""
 
 SELECT
-
-    
-
         t.trainId,
 
         t.trainNo,
@@ -33,9 +29,7 @@ SELECT
         (
 
             COUNT(DISTINCT s)
-
             -
-
             COUNT(DISTINCT sb.seat)
 
         )
