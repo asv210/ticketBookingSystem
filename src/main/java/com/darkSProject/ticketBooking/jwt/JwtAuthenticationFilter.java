@@ -1,6 +1,6 @@
 package com.darkSProject.ticketBooking.jwt;
 
-import com.darkSProject.ticketBooking.services.CustomUserDetailsService;
+import com.darkSProject.ticketBooking.auth.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
