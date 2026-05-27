@@ -4,6 +4,7 @@ import com.darkSProject.ticketBooking.common.dto.PaginationResponseDTO;
 import com.darkSProject.ticketBooking.train.dto.AddTrainRequestDTO;
 import com.darkSProject.ticketBooking.train.dto.AddTrainResponseDTO;
 import com.darkSProject.ticketBooking.common.dto.ApiResponse;
+import com.darkSProject.ticketBooking.train.dto.SearchTrainRequestDTO;
 import com.darkSProject.ticketBooking.train.dto.SearchTrainResponseDTO;
 import com.darkSProject.ticketBooking.train.service.TrainService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.Date;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/trains")
+@RequestMapping("/api/trains")
 public class TrainController {
     private final TrainService trainService;
 
@@ -28,6 +29,30 @@ public class TrainController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<
+            ApiResponse<SearchTrainResponseDTO>
+            > searchTrain(
+
+            @ModelAttribute SearchTrainRequestDTO request,
+
+            @RequestParam(defaultValue = "0")
+            int page,
+
+            @RequestParam(defaultValue = "10")
+            int size
+    ) {
+
+        return ResponseEntity.ok(
+
+                trainService.searchTrain(
+                        request,
+                        page,
+                        size
+                )
+        );
     }
 
 }

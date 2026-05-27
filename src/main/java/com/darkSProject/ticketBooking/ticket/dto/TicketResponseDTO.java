@@ -11,7 +11,7 @@ public record TicketResponseDTO(
 
         String ticketId,
 
-        String trainNumber,
+        String trainNo,
 
         String trainName,
 

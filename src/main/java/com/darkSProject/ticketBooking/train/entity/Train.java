@@ -17,6 +17,8 @@ public class Train {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String trainId;
 
+    @OneToMany(mappedBy = "train")
+    private List<Coach> coaches;
     @Column(unique = true)
     private String trainNo;
     private String trainName;

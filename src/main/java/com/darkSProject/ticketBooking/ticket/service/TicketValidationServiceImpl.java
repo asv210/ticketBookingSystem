@@ -21,7 +21,6 @@ public class TicketValidationServiceImpl implements TicketValidationService {
                         ticketId,
                         user
                 )
-
                 .orElseThrow(() ->
 
                         new BadRequestException(

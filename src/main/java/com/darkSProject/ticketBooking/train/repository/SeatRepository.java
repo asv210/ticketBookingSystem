@@ -1,5 +1,7 @@
 package com.darkSProject.ticketBooking.train.repository;
 
+import com.darkSProject.ticketBooking.ticket.entity.BookingStatus;
+import com.darkSProject.ticketBooking.train.dto.CoachAvailabilityProjection;
 import com.darkSProject.ticketBooking.train.entity.Seat;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
@@ -7,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +32,7 @@ AND s.seatId NOT IN (
 
     WHERE sb.dateOfTravel = :date
 
-    AND sb.bookingStatus =
-        com.darkSProject.ticketBooking.entities.BookingStatus.BOOKED
+    AND sb.bookingStatus = :bookingStatus
 
     AND (
 
@@ -44,7 +44,7 @@ AND s.seatId NOT IN (
     )
 )
 
-ORDER BY s.coach, s.seatNumber
+ORDER BY s.coach.coachName, s.seatNumber
 
 """)
     List<Seat> findAvailableSeats(
@@ -57,6 +57,65 @@ ORDER BY s.coach, s.seatNumber
 
             Integer destinationOrder,
 
+            BookingStatus bookingStatus,
+
             Pageable pageable
+    );
+
+    @Query("""
+
+SELECT
+
+    s.coach.coachName AS coach,
+
+    COUNT(s) AS availableSeats
+
+FROM Seat s
+
+WHERE s.train.trainNo = :trainNo
+
+AND s.seatId NOT IN (
+
+    SELECT sb.seat.seatId
+
+    FROM SeatBooking sb
+
+    WHERE
+
+        sb.dateOfTravel = :dateOfTravel
+
+    AND
+
+        sb.bookingStatus = 'BOOKED'
+
+    AND
+
+        sb.train.trainNo = :trainNo
+
+    AND (
+
+            sb.sourceOrder < :destinationOrder
+
+        AND
+
+            sb.destinationOrder > :sourceOrder
+    )
+)
+
+GROUP BY s.coach.coachName
+
+ORDER BY s.coach.coachName
+
+""")
+    List<CoachAvailabilityProjection>
+    findSeatAvailability(
+
+            String trainNo,
+
+            Integer sourceOrder,
+
+            Integer destinationOrder,
+
+            Date dateOfTravel
     );
 }

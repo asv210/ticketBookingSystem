@@ -9,6 +9,7 @@ import com.darkSProject.ticketBooking.ticket.dto.SeatInfoDTO;
 import com.darkSProject.ticketBooking.ticket.dto.TicketResponseDTO;
 import com.darkSProject.ticketBooking.ticket.entity.BookingStatus;
 import com.darkSProject.ticketBooking.ticket.entity.TicketStatus;
+import com.darkSProject.ticketBooking.train.dto.StationPairDTO;
 import com.darkSProject.ticketBooking.train.entity.Seat;
 import com.darkSProject.ticketBooking.train.entity.SeatBooking;
 import com.darkSProject.ticketBooking.train.entity.StationSchedule;
@@ -17,6 +18,7 @@ import com.darkSProject.ticketBooking.ticket.repository.TicketRepository;
 import com.darkSProject.ticketBooking.train.entity.Train;
 import com.darkSProject.ticketBooking.train.repository.TrainRepository;
 import com.darkSProject.ticketBooking.ticket.entity.Ticket;
+import com.darkSProject.ticketBooking.train.service.TrainServiceValidation;
 import com.darkSProject.ticketBooking.user.entity.User;
 import com.darkSProject.ticketBooking.user.repository.UserRepository;
 import com.darkSProject.ticketBooking.user.service.UserValidationService;
@@ -39,61 +41,34 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
     private final UserValidationService userValidationService;
     private final TicketValidationService ticketValidationService;
+    private final TrainServiceValidation trainServiceValidation;
     @Transactional
     @Override
     public ApiResponse<TicketResponseDTO> bookTicket(
             BookTicketRequestDTO request
     ){
         User user = userValidationService.getCurrentUser();
-        Train train = trainRepository.findByTrainNo(request.trainNo())
-                .orElseThrow(()->{
-                         throw new BadRequestException("TrainNo not exists", ErrorCode.TRAIN_NOT_EXIST);
-                    }
-                );
+        Train train = trainServiceValidation.verifyAndFetchTrain(request.trainNo());
         Pageable pageable = PageRequest.of(0, request.numberOfSeats());
-        List<StationSchedule> stations=train.getSchedules();
-       Integer sourceOrder = stations.stream()
-               .filter(station ->
+        StationPairDTO stationPair=trainServiceValidation.verifyRoute(train,request.source(),request.destination());
 
-                   station.getStationName().equalsIgnoreCase(request.source())
-               ).findFirst()
-               .orElseThrow(
-                       () ->   new BadRequestException(
+            if(stationPair==null){
+                throw new BadRequestException(
 
-                               "Invalid source station",
+                        "Route does not exist between '%s' and '%s'"
+                                .formatted(request.source(), request.destination()),
 
-                               ErrorCode.INVALID_ROUTE
-                       )
-               ).getStationOrder();
-        Integer destinationOrder = stations.stream()
-                .filter(station ->
-
-                        station.getStationName().equalsIgnoreCase(request.destination())
-                ).findFirst()
-                .orElseThrow(
-                        () ->   new BadRequestException(
-
-                                "Invalid source station",
-
-                                ErrorCode.INVALID_ROUTE
-                        )
-                ).getStationOrder();
-        if(sourceOrder > destinationOrder) {
-            throw new BadRequestException(
-                    "Invalid route selected",
-                    ErrorCode.INVALID_ROUTE
-            );
-        }else if(sourceOrder==destinationOrder){
-            throw new BadRequestException(
-                    "Source and destination cannot be same",
-                     ErrorCode.INVALID_ROUTE
-            );
-        }
+                        ErrorCode.INVALID_ROUTE
+                );
+            }
+        Integer destinationOrder=stationPair.destinationStation().getStationOrder();
+        Integer sourceOrder=stationPair.sourceStation().getStationOrder();
         List<Seat> seats = seatRepository.findAvailableSeats(
                 train.getTrainId(),
                 request.dateOfTravel(),
                 sourceOrder,
                 destinationOrder,
+                BookingStatus.BOOKED,
                 pageable
         );
         if(seats.size()< request.numberOfSeats()){
@@ -134,7 +109,7 @@ public class TicketServiceImpl implements TicketService {
            List<SeatInfoDTO> seatInfo= seats.stream()
                    .map(seat ->
                             SeatInfoDTO.builder()
-                               .coach(seat.getCoach())
+                               .coachName(seat.getCoach().getCoachName())
                                .seatNumber(seat.getSeatNumber())
                                .build()
                    ).toList();
@@ -145,7 +120,7 @@ public class TicketServiceImpl implements TicketService {
                    .source(request.source())
                    .destination(request.destination())
                    .trainName(train.getTrainName())
-                   .trainNumber(train.getTrainName())
+                   .trainNo(train.getTrainNo())
                    .seats(seatInfo)
                    .status(TicketStatus.BOOKED)
                    .build();
@@ -187,40 +162,57 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public ApiResponse<PaginationResponseDTO<TicketResponseDTO>> myBookings(int page, int size, TicketStatus status) {
-        User user=userValidationService.getCurrentUser();
-        Pageable pageable = PageRequest.of(
-                page,
-                size
+    public ApiResponse<PaginationResponseDTO<TicketResponseDTO>>
+    myBookings(int page, int size, TicketStatus status) {
+
+        User user = userValidationService.getCurrentUser();
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Ticket> tickets = ticketRepository.getMyBookings(
+                user.getUserId(),
+                status,
+                pageable
         );
-        Page<TicketResponseDTO> myBookings;
-        if(status != null) {
 
-            myBookings =
+        Page<TicketResponseDTO> response = tickets.map(ticket -> {
 
-                    ticketRepository
-                            .getMyBookings(
+            List<SeatInfoDTO> seats = ticket
+                    .getSeatBookings()
+                    .stream()
+                    .map(seatBooking ->
 
-                                    user.getUserId(),
+                            SeatInfoDTO.builder()
+                                    .coachName(
+                                            seatBooking
+                                                    .getSeat()
+                                                    .getCoach()
+                                                    .getCoachName()
+                                    )
+                                    .seatNumber(
+                                            seatBooking
+                                                    .getSeat()
+                                                    .getSeatNumber()
+                                    )
+                                    .build()
+                    )
+                    .toList();
 
-                                    status,
+            return TicketResponseDTO.builder()
+                    .ticketId(ticket.getTicketId())
+                    .trainNo(ticket.getTrain().getTrainNo())
+                    .trainName(ticket.getTrain().getTrainName())
+                    .source(ticket.getSource())
+                    .destination(ticket.getDestination())
+                    .dateOfTravel(ticket.getDateOfTravel())
+                    .status(ticket.getStatus())
+                    .seats(seats)
+                    .build();
+        });
 
-                                    pageable
-                            );
-        }else{
-            myBookings =
-                    ticketRepository
-                            .getMyBookings(
-
-                                    user.getUserId(),
-                                    null,
-                                    pageable
-                            );
-        }
         return ApiResponse.success(
                 "Bookings fetched successfully",
-                PaginationResponseDTO.from(myBookings)
-
+                PaginationResponseDTO.from(response)
         );
     }
 }

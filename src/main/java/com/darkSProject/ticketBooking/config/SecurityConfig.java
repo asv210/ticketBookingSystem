@@ -22,7 +22,8 @@ public class SecurityConfig {
                         )
                         .authorizeHttpRequests(auth->auth
                         .requestMatchers(
-                                "/auth/**"
+                                "/auth/**",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(

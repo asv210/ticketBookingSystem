@@ -1,10 +1,12 @@
 package com.darkSProject.ticketBooking.train.dto;
 
 
-public record TrainSearchProjection(
-        String trainId,
-        String trainNo,
-        String trainName,
-        Long availableSeats
-) {
+public interface TrainSearchProjection {
+    String getTrainId();
+
+    String getTrainNo();
+
+    String getTrainName();
+
+    Number getAvailableSeats();
 }

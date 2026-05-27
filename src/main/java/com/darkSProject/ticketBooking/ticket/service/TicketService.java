@@ -19,6 +19,4 @@ public interface TicketService {
             int page,
             int size,
             TicketStatus status);
-
-    public  ApiResponse<TicketResponseDTO>
 }

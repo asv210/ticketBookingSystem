@@ -16,7 +16,9 @@ public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String seatId;
-    private String coachId;
+    @ManyToOne
+    @JoinColumn(name = "coach_id")
+    private Coach coach;
 
     private Integer seatNumber;
 
