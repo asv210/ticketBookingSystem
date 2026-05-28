@@ -1,11 +1,8 @@
 package com.darkSProject.ticketBooking.train.controller;
 
 import com.darkSProject.ticketBooking.common.dto.PaginationResponseDTO;
-import com.darkSProject.ticketBooking.train.dto.AddTrainRequestDTO;
-import com.darkSProject.ticketBooking.train.dto.AddTrainResponseDTO;
+import com.darkSProject.ticketBooking.train.dto.*;
 import com.darkSProject.ticketBooking.common.dto.ApiResponse;
-import com.darkSProject.ticketBooking.train.dto.SearchTrainRequestDTO;
-import com.darkSProject.ticketBooking.train.dto.SearchTrainResponseDTO;
 import com.darkSProject.ticketBooking.train.service.TrainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/trains")
 public class TrainController {
@@ -54,5 +51,17 @@ public class TrainController {
                 )
         );
     }
+
+    @GetMapping("/availability")
+    public ApiResponse<SeatAvailabilityResponseDTO>
+    getAvailability(
+
+            @ModelAttribute
+            SeatAvailabilityRequestDTO request
+    ) {
+
+        return trainService.getAvailability(request);
+    }
+
 
 }

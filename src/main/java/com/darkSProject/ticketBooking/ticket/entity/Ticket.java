@@ -1,6 +1,5 @@
 package com.darkSProject.ticketBooking.ticket.entity;
 
-import com.darkSProject.ticketBooking.train.entity.SeatBooking;
 import com.darkSProject.ticketBooking.train.entity.Train;
 import com.darkSProject.ticketBooking.user.entity.User;
 import jakarta.persistence.*;
@@ -43,4 +42,7 @@ public class Ticket {
     private Date createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    private LocalDateTime expireAt;
+
+    private Double totalFare;
 }

@@ -1,7 +1,7 @@
-package com.darkSProject.ticketBooking.train.entity;
+package com.darkSProject.ticketBooking.ticket.entity;
 
-import com.darkSProject.ticketBooking.ticket.entity.BookingStatus;
-import com.darkSProject.ticketBooking.ticket.entity.Ticket;
+import com.darkSProject.ticketBooking.train.entity.Seat;
+import com.darkSProject.ticketBooking.train.entity.Train;
 import jakarta.persistence.*;
 import lombok.*;
 

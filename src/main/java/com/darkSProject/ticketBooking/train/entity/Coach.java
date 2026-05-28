@@ -21,6 +21,10 @@ public class Coach {
     private String coachId;
 
     private String coachName;
+    @Enumerated(EnumType.STRING)
+    private CoachType coachType;
+
+    private Double farePerStation;
 
     @ManyToOne
     private Train train;

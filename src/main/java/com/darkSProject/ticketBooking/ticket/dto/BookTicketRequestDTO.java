@@ -1,5 +1,6 @@
 package com.darkSProject.ticketBooking.ticket.dto;
 
+import com.darkSProject.ticketBooking.train.entity.CoachType;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -41,6 +42,11 @@ public record BookTicketRequestDTO(
                 value = 1,
                 message = "At least 1 seat must be booked"
         )
-        Integer numberOfSeats
-) {
+        Integer numberOfSeats,
+        @NotNull(
+                message = "Coach type is required"
+        )
+        CoachType coachType
+
+        ) {
 }

@@ -55,16 +55,12 @@ public class TrainServiceImpl implements TrainService {
                         page,
                         size
                 );
-     System.out.println(request.source());
-        System.out.println(request.destination());
-        System.out.println(request.dateOfTravel());
 
         Page<TrainSearchProjection> trainPage=trainRepository.searchTrains(request.source(),
                 request.destination(),
                 request.dateOfTravel(),
                 BookingStatus.BOOKED,
                 pageable);
-        System.out.println(trainPage);
         PaginationResponseDTO<TrainSearchProjection> paginatedTrains =
 
                 PaginationResponseDTO
@@ -90,7 +86,10 @@ public class TrainServiceImpl implements TrainService {
             SeatAvailabilityRequestDTO request
     ) {
         Train train = trainServiceValidation.verifyAndFetchTrain(request.trainNo());
-        StationPairDTO stationPair=trainServiceValidation.verifyRoute(train,request.source(),request.destination());
+        StationPairDTO stationPair=trainServiceValidation.verifyRoute(
+                train,
+                request.source(),
+                request.destination());
         if(stationPair==null){
             throw new BadRequestException(
 
@@ -102,9 +101,7 @@ public class TrainServiceImpl implements TrainService {
         }
         Integer destinationOrder=stationPair.destinationStation().getStationOrder();
         Integer sourceOrder=stationPair.sourceStation().getStationOrder();
-        List<CoachAvailabilityProjection> projections =
-
-                seatRepository.findSeatAvailability(
+        List<CoachAvailabilityProjection> projections = seatRepository.findSeatAvailability(
                         request.trainNo(),
                         sourceOrder,
                         destinationOrder,

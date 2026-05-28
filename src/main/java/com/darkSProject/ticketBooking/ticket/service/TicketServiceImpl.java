@@ -4,6 +4,9 @@ import com.darkSProject.ticketBooking.common.dto.ApiResponse;
 import com.darkSProject.ticketBooking.common.dto.PaginationResponseDTO;
 import com.darkSProject.ticketBooking.common.exception.BadRequestException;
 import com.darkSProject.ticketBooking.common.exception.ErrorCode;
+import com.darkSProject.ticketBooking.payment.dto.PaymentEventDTO;
+import com.darkSProject.ticketBooking.payment.producer.PaymentProducer;
+import com.darkSProject.ticketBooking.pricing.service.PricingService;
 import com.darkSProject.ticketBooking.ticket.dto.BookTicketRequestDTO;
 import com.darkSProject.ticketBooking.ticket.dto.SeatInfoDTO;
 import com.darkSProject.ticketBooking.ticket.dto.TicketResponseDTO;
@@ -11,16 +14,13 @@ import com.darkSProject.ticketBooking.ticket.entity.BookingStatus;
 import com.darkSProject.ticketBooking.ticket.entity.TicketStatus;
 import com.darkSProject.ticketBooking.train.dto.StationPairDTO;
 import com.darkSProject.ticketBooking.train.entity.Seat;
-import com.darkSProject.ticketBooking.train.entity.SeatBooking;
-import com.darkSProject.ticketBooking.train.entity.StationSchedule;
+import com.darkSProject.ticketBooking.ticket.entity.SeatBooking;
 import com.darkSProject.ticketBooking.train.repository.SeatRepository;
 import com.darkSProject.ticketBooking.ticket.repository.TicketRepository;
 import com.darkSProject.ticketBooking.train.entity.Train;
-import com.darkSProject.ticketBooking.train.repository.TrainRepository;
 import com.darkSProject.ticketBooking.ticket.entity.Ticket;
 import com.darkSProject.ticketBooking.train.service.TrainServiceValidation;
 import com.darkSProject.ticketBooking.user.entity.User;
-import com.darkSProject.ticketBooking.user.repository.UserRepository;
 import com.darkSProject.ticketBooking.user.service.UserValidationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,19 +29,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
-    private final TrainRepository trainRepository;
     private final SeatRepository seatRepository;
-    private final UserRepository userRepository;
     private final TicketRepository ticketRepository;
     private final UserValidationService userValidationService;
     private final TicketValidationService ticketValidationService;
     private final TrainServiceValidation trainServiceValidation;
+    private final PaymentProducer paymentProducer;
+    private final PricingService pricingService;
     @Transactional
     @Override
     public ApiResponse<TicketResponseDTO> bookTicket(
@@ -66,22 +67,42 @@ public class TicketServiceImpl implements TicketService {
         List<Seat> seats = seatRepository.findAvailableSeats(
                 train.getTrainId(),
                 request.dateOfTravel(),
+                request.coachType(),
                 sourceOrder,
                 destinationOrder,
-                BookingStatus.BOOKED,
+                List.of(
+                        BookingStatus.PENDING,
+                        BookingStatus.BOOKED
+                ),
                 pageable
         );
         if(seats.size()< request.numberOfSeats()){
             throw new BadRequestException("Not enough seats available",ErrorCode.SEATS_UNAVAILABLE);
         }
-        Ticket ticket=
-                Ticket.builder()
+        LocalDateTime expireAt=LocalDateTime.now()
+                .plusMinutes(5);
+        int stationTravel=destinationOrder-sourceOrder;
+        Double totalFare =
+                pricingService.calculateFare(
+                        train,
+                        stationTravel,
+                        request.coachType(),
+                        request.numberOfSeats()
+                );
+
+        Ticket ticket= Ticket.builder()
                         .dateOfTravel(request.dateOfTravel())
                         .train(train)
                         .user(user)
+                        .status(TicketStatus.PENDING_PAYMENT)
                         .destination(request.destination())
                         .source(request.source())
+                        .expireAt(
+                            expireAt
+                        )
+                        .totalFare(totalFare)
                         .build();
+
 
         List<SeatBooking> seatBookings = seats.stream()
                         .map(
@@ -89,7 +110,7 @@ public class TicketServiceImpl implements TicketService {
                                     SeatBooking seatBooking=
                                             SeatBooking.builder()
                                                     .seat(seat)
-                                                    .bookingStatus(BookingStatus.BOOKED)
+                                                    .bookingStatus(BookingStatus.PENDING)
                                                     .ticket(ticket)
                                                     .train(train)
                                                     .dateOfTravel(request.dateOfTravel())
@@ -106,28 +127,37 @@ public class TicketServiceImpl implements TicketService {
                 seatBookings
         );
            Ticket savedTicket= ticketRepository.save(ticket);
-           List<SeatInfoDTO> seatInfo= seats.stream()
-                   .map(seat ->
-                            SeatInfoDTO.builder()
-                               .coachName(seat.getCoach().getCoachName())
-                               .seatNumber(seat.getSeatNumber())
-                               .build()
-                   ).toList();
+
+        paymentProducer.sendPaymentEvent(
+
+                PaymentEventDTO.builder()
+                        .ticketId(
+                                savedTicket.getTicketId()
+                        )
+                        .userId(
+                                user.getUserId()
+                        )
+                        .amount(totalFare)
+                        .build()
+        );
+
 
            TicketResponseDTO response= TicketResponseDTO.builder()
                    .dateOfTravel(request.dateOfTravel())
-                   .ticketId(ticket.getTicketId())
+                   .ticketId(savedTicket.getTicketId())
                    .source(request.source())
                    .destination(request.destination())
                    .trainName(train.getTrainName())
                    .trainNo(train.getTrainNo())
-                   .seats(seatInfo)
-                   .status(TicketStatus.BOOKED)
+                   .status(TicketStatus.PENDING_PAYMENT)
+                   .expireAt(expireAt)
+                   .totalFare(totalFare)
                    .build();
+
            return ApiResponse.<TicketResponseDTO>builder()
                    .data(response)
                    .success(true)
-                   .message("Ticket booked successfully")
+                   .message("Payment processing started")
                     .build();
     }
 

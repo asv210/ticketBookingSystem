@@ -1,5 +1,6 @@
 package com.darkSProject.ticketBooking.train.entity;
 
+import com.darkSProject.ticketBooking.ticket.entity.SeatBooking;
 import jakarta.persistence.*;
 import lombok.*;
 

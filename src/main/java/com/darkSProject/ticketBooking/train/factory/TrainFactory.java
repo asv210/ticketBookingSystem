@@ -45,6 +45,8 @@ public class TrainFactory{
 
             Coach coach = Coach.builder()
                     .coachName(coachDTO.coachName())
+                    .coachType(coachDTO.coachType())
+                    .farePerStation(coachDTO.farePerStation())
                     .train(savedTrain)
                     .build();
 

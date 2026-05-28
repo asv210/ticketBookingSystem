@@ -3,8 +3,10 @@ package com.darkSProject.ticketBooking.ticket.dto;
 import com.darkSProject.ticketBooking.ticket.entity.TicketStatus;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Builder
 public record TicketResponseDTO(
@@ -23,6 +25,10 @@ public record TicketResponseDTO(
 
         Date dateOfTravel,
 
-        TicketStatus status
+        TicketStatus status,
+
+        LocalDateTime expireAt,
+
+        Double totalFare
 ) {
 }
