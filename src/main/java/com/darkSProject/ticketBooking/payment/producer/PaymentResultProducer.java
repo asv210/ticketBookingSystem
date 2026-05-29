@@ -1,30 +1,25 @@
 package com.darkSProject.ticketBooking.payment.producer;
 
 import com.darkSProject.ticketBooking.payment.config.RabbitMQConfig;
-import com.darkSProject.ticketBooking.payment.dto.PaymentEventDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentResultEventDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-
-import java.util.Queue;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentProducer {
+public class PaymentResultProducer {
     private final RabbitTemplate rabbitTemplate;
 
-
-    public void sendPaymentEvent(
-            PaymentEventDTO event
+    public void sendPaymentResult(
+            PaymentResultEventDTO event
     ) {
 
         rabbitTemplate.convertAndSend(
 
-                RabbitMQConfig.PAYMENT_QUEUE,
+                RabbitMQConfig.PAYMENT_RESULT_QUEUE,
 
                 event
         );
     }
-
 }

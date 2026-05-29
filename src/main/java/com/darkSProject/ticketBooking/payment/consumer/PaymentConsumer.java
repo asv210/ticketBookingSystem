@@ -2,40 +2,149 @@ package com.darkSProject.ticketBooking.payment.consumer;
 
 import com.darkSProject.ticketBooking.payment.config.RabbitMQConfig;
 import com.darkSProject.ticketBooking.payment.dto.PaymentEventDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentResultEventDTO;
+import com.darkSProject.ticketBooking.payment.producer.PaymentResultProducer;
+import com.rabbitmq.client.Channel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 @Service
+@RequiredArgsConstructor
 @Slf4j
+
 public class PaymentConsumer {
+
+    private final PaymentResultProducer
+            paymentResultProducer;
+
     @RabbitListener(
-            queues = RabbitMQConfig.PAYMENT_QUEUE
+            queues =
+                    RabbitMQConfig.PAYMENT_QUEUE
     )
+
     public void processPayment(
-            PaymentEventDTO event
-    ){
 
-        log.info(
-                "Processing payment for ticket: {} amount: {}",
-                event.ticketId(),
-                event.amount()
-        );
+            PaymentEventDTO event,
 
-        // simulate payment processing
+            Channel channel,
+
+            @Header(
+                    AmqpHeaders.DELIVERY_TAG
+            )
+            long tag,
+            @Header(
+                    name = "x-death",
+                    required = false
+            )
+            List<Map<String, Object>> xDeath
+
+    ) throws IOException {
 
         try {
 
+            log.info(
+                    "Processing payment for ticket: {}",
+                    event.ticketId()
+            );
+
+            // simulate payment processing
+
             Thread.sleep(3000);
 
-        } catch (InterruptedException e) {
+            // simulate payment failure
 
-            throw new RuntimeException(e);
+            if(event.amount() > 5000) {
+
+                throw new RuntimeException(
+                        "Payment gateway failed"
+                );
+            }
+
+            // publish success event
+
+            paymentResultProducer.sendPaymentResult(
+
+                    PaymentResultEventDTO.builder()
+                            .ticketId(event.ticketId())
+                            .eventId(UUID.randomUUID().toString())
+                            .success(true)
+                            .build()
+            );
+
+            // ACKNOWLEDGE SUCCESS
+
+            channel.basicAck(
+                    tag,
+                    false
+            );
+
+            log.info(
+                    "Payment successful for ticket: {}",
+                    event.ticketId()
+            );
+
+        } catch (Exception ex) {
+            int retryCount = 0;
+
+            if(xDeath != null && !xDeath.isEmpty()) {
+
+                retryCount =
+
+                        ((Long)
+                                xDeath.get(0)
+                                        .get("count"))
+                                .intValue();
+            }
+            if(retryCount >= 3) {
+
+                log.error(
+                        "Max retries exceeded: {}",
+                        event.ticketId()
+                );
+
+                // send to DLQ
+
+                channel.basicReject(
+                        tag,
+                        false
+                );
+
+            } else {
+
+                // retry
+
+                channel.basicNack(
+                        tag,
+                        false,
+                        false
+                );
+            }
+
+            log.error(
+                    "Payment failed for ticket: {}",
+                    event.ticketId()
+            );
+
+
+            // SEND TO DLQ
+
+            channel.basicNack(
+
+                    tag,
+
+                    false,
+
+                    false
+            );
         }
-
-        log.info(
-                "Payment successful for ticket: {}",
-                event.ticketId()
-        );
     }
 }
