@@ -16,9 +16,8 @@ public class PaymentResultProducer {
     ) {
 
         rabbitTemplate.convertAndSend(
-
-                RabbitMQConfig.PAYMENT_RESULT_QUEUE,
-
+                "payment_result_exchange",
+                "",
                 event
         );
     }

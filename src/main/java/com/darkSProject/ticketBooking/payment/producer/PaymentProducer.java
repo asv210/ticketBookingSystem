@@ -20,9 +20,8 @@ public class PaymentProducer {
     ) {
 
         rabbitTemplate.convertAndSend(
-
-                RabbitMQConfig.PAYMENT_QUEUE,
-
+                "payment_result_exchange",
+                "",
                 event
         );
     }

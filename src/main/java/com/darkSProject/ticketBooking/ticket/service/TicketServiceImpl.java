@@ -141,7 +141,23 @@ public class TicketServiceImpl implements TicketService {
                         .build()
         );
 
+        List<SeatInfoDTO> seatInfoList =
+                seatBookings.stream()
+                        .map(seatBooking ->
 
+                                SeatInfoDTO.builder()
+                                        .coachName(
+                                                seatBooking.getSeat()
+                                                        .getCoach()
+                                                        .getCoachName()
+                                        )
+                                        .seatNumber(
+                                                seatBooking.getSeat()
+                                                        .getSeatNumber()
+                                        )
+                                        .build()
+                        )
+                        .toList();
            TicketResponseDTO response= TicketResponseDTO.builder()
                    .dateOfTravel(request.dateOfTravel())
                    .ticketId(savedTicket.getTicketId())
@@ -152,6 +168,7 @@ public class TicketServiceImpl implements TicketService {
                    .status(TicketStatus.PENDING_PAYMENT)
                    .expireAt(expireAt)
                    .totalFare(totalFare)
+                   .seats(seatInfoList)
                    .build();
 
            return ApiResponse.<TicketResponseDTO>builder()

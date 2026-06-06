@@ -24,15 +24,25 @@ public class TicketPaymentConsumer {
     private final ProcessEventRepository processEventRepository;
     @Transactional
     @RabbitListener(
-            queues =
-                    RabbitMQConfig.PAYMENT_RESULT_QUEUE
+            queues = "ticket_result_queue"
     )
     public void handlePaymentResult(
             PaymentResultEventDTO event
     ) {
-
+        log.info(
+                "Received payment result event: {}",
+                event
+        );
         // STEP 1
         // check already processed
+        if(event.eventId() == null) {
+
+            log.error(
+                    "Received event with null eventId"
+            );
+
+            return;
+        }
 
         boolean alreadyProcessed =
 
@@ -55,7 +65,10 @@ public class TicketPaymentConsumer {
                 ticketRepository
                         .findById(event.ticketId())
                         .orElseThrow();
-
+        log.info(
+                "Ticket found: {}",
+                ticket.getTicketId()
+        );
         if(event.success()) {
 
             ticket.setStatus(
@@ -108,5 +121,9 @@ public class TicketPaymentConsumer {
 
                         .build()
         );
+        log.info(
+                "Ticket updated successfully"
+        );
+        log.info("END OF METHOD");
     }
 }

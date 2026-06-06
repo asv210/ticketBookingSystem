@@ -75,9 +75,16 @@ public class PaymentConsumer {
 
                     PaymentResultEventDTO.builder()
                             .ticketId(event.ticketId())
+                            .userId(event.userId())
                             .eventId(UUID.randomUUID().toString())
                             .success(true)
                             .build()
+            );
+            log.info(
+                    "Publishing PaymentResultEvent for ticket {}",
+                    event.ticketId()
+            );log.info(
+                    "PaymentResultEvent published successfully"
             );
 
             // ACKNOWLEDGE SUCCESS

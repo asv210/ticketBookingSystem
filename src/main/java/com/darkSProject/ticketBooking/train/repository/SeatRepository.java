@@ -9,8 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public interface SeatRepository extends JpaRepository<Seat, String> {
             
                 WHERE sb.dateOfTravel = :date
             
-                AND sb.bookingStatus = IN :statuses
+                AND sb.bookingStatus IN :statuses
             
                 AND (
             
@@ -51,19 +53,12 @@ public interface SeatRepository extends JpaRepository<Seat, String> {
             
             """)
     List<Seat> findAvailableSeats(
-
-            String trainId,
-
-            Date date,
-
-            CoachType coachType,
-
-            Integer sourceOrder,
-
-            Integer destinationOrder,
-
-            List<BookingStatus> statuses,
-
+            @Param("trainId") String trainId,
+            @Param("date") LocalDateTime date,
+            @Param("coachType") CoachType coachType,
+            @Param("sourceOrder") Integer sourceOrder,
+            @Param("destinationOrder") Integer destinationOrder,
+            @Param("statuses") List<BookingStatus> statuses,
             Pageable pageable
     );
 
@@ -91,7 +86,7 @@ public interface SeatRepository extends JpaRepository<Seat, String> {
             
                 AND
             
-                    sb.bookingStatus = IN ('BOOKED', 'PENDING')
+                    sb.bookingStatus IN :statuses
             
                 AND
             
@@ -114,13 +109,10 @@ public interface SeatRepository extends JpaRepository<Seat, String> {
             """)
     List<CoachAvailabilityProjection>
     findSeatAvailability(
-
-            String trainNo,
-
-            Integer sourceOrder,
-
-            Integer destinationOrder,
-
-            Date dateOfTravel
+            @Param("trainNo") String trainNo,
+            @Param("sourceOrder") Integer sourceOrder,
+            @Param("destinationOrder") Integer destinationOrder,
+            @Param("dateOfTravel") Date dateOfTravel,
+            @Param("statuses") List<BookingStatus> statuses
     );
 }

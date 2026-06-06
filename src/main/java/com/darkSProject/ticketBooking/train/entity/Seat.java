@@ -23,8 +23,6 @@ public class Seat {
 
     private Integer seatNumber;
 
-    private boolean booked;
-
     @ManyToOne
     @JoinColumn(name = "train_id")
     private Train train;

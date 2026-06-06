@@ -61,7 +61,6 @@ public class TrainFactory{
 
                         Seat.builder()
                                 .train(savedTrain)
-                                .booked(false)
                                 .seatNumber(i)
                                 .coach(savedCoach)
                                 .build()

@@ -1,8 +1,11 @@
 package com.darkSProject.ticketBooking.payment.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 
 @Configuration
@@ -73,12 +76,49 @@ public class RabbitMQConfig  {
                 true
         );
     }
-    @Bean
-    public Queue paymentResultQueue() {
 
+    @Bean
+    public MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+    @Bean
+    public FanoutExchange paymentResultExchange() {
+        return new FanoutExchange(
+                "payment_result_exchange"
+        );
+    }
+    @Bean
+    public Queue ticketResultQueue() {
         return new Queue(
-                PAYMENT_RESULT_QUEUE,
+                "ticket_result_queue",
                 true
         );
+    }
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue(
+                "notification_queue",
+                true
+        );
+    }
+    @Bean
+    public Binding ticketBinding(
+            Queue ticketResultQueue,
+            FanoutExchange paymentResultExchange
+    ) {
+
+        return BindingBuilder
+                .bind(ticketResultQueue)
+                .to(paymentResultExchange);
+    }
+    @Bean
+    public Binding notificationBinding(
+            Queue notificationQueue,
+            FanoutExchange paymentResultExchange
+    ) {
+
+        return BindingBuilder
+                .bind(notificationQueue)
+                .to(paymentResultExchange);
     }
 }

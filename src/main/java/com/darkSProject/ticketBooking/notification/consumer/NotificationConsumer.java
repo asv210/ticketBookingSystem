@@ -20,10 +20,8 @@ public class NotificationConsumer {
             notificationService;
 
     @RabbitListener(
-            queues =
-                    RabbitMQConfig.PAYMENT_RESULT_QUEUE
+            queues = "notification_queue"
     )
-
     public void consumePaymentNotification(
             PaymentResultEventDTO event
     ) {

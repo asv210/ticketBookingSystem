@@ -1,10 +1,7 @@
 package com.darkSProject.ticketBooking.train.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,8 +9,9 @@ import java.util.List;
 @Entity
 @Builder
 @Getter
-@RequiredArgsConstructor
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Coach {
 
     @Id

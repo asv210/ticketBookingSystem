@@ -5,6 +5,7 @@ import com.darkSProject.ticketBooking.train.entity.Train;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Builder
@@ -43,7 +44,7 @@ public class SeatBooking {
     @Column(
             nullable = false
     )
-    private Date dateOfTravel;
+    private LocalDateTime dateOfTravel;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus bookingStatus;

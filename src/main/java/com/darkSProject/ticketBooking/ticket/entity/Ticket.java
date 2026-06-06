@@ -5,11 +5,11 @@ import com.darkSProject.ticketBooking.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Builder
 @Entity
@@ -24,7 +24,7 @@ public class Ticket {
     private String ticketId;
     private String source;
     private String destination;
-    private Date dateOfTravel;
+    private LocalDateTime dateOfTravel;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -38,8 +38,8 @@ public class Ticket {
     private List<SeatBooking> seatBookings;
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
-    @CreatedDate
-    private Date createdAt;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
     private LocalDateTime expireAt;

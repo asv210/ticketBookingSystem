@@ -59,7 +59,7 @@ public interface TicketRepository extends JpaRepository<Ticket, String> {
             
             FROM Ticket t
             
-            WHERE t.status = :pendingPaymentStatus
+            WHERE t.status = :status
             
             AND t.expireAt <= :currentTime
             

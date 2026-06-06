@@ -6,6 +6,7 @@ import com.darkSProject.ticketBooking.ticket.entity.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface SeatBookingRepository extends JpaRepository<SeatBooking,String> {
     @Modifying
@@ -19,9 +20,7 @@ public interface SeatBookingRepository extends JpaRepository<SeatBooking,String>
             
             """)
     void updateBookingStatus(
-
-            Ticket ticket,
-
-            BookingStatus status
+            @Param("ticket") Ticket ticket,
+            @Param("status") BookingStatus status
     );
 }

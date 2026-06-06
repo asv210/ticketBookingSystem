@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Builder
@@ -33,7 +34,7 @@ public record BookTicketRequestDTO(
         @FutureOrPresent(
                 message = "Date of travel cannot be in the past"
         )
-        Date dateOfTravel,
+        LocalDateTime dateOfTravel,
 
         @NotNull(
                 message = "Number of seats is required"

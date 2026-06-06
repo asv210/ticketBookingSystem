@@ -23,7 +23,7 @@ public record TicketResponseDTO(
 
         String destination,
 
-        Date dateOfTravel,
+        LocalDateTime dateOfTravel,
 
         TicketStatus status,
 

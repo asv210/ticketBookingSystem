@@ -105,7 +105,8 @@ public class TrainServiceImpl implements TrainService {
                         request.trainNo(),
                         sourceOrder,
                         destinationOrder,
-                        request.dateOfTravel()
+                        request.dateOfTravel(),
+                        List.of(BookingStatus.BOOKED, BookingStatus.PENDING)
                 );
         List<CoachAvailabilityDTO> coaches =
 
