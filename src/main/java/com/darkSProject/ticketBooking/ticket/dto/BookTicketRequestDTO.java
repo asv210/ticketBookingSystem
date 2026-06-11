@@ -1,5 +1,6 @@
 package com.darkSProject.ticketBooking.ticket.dto;
 
+import com.darkSProject.ticketBooking.payment.dto.PaymentRequest;
 import com.darkSProject.ticketBooking.train.entity.CoachType;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
@@ -8,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Builder
 public record BookTicketRequestDTO(
@@ -47,7 +47,11 @@ public record BookTicketRequestDTO(
         @NotNull(
                 message = "Coach type is required"
         )
-        CoachType coachType
+        CoachType coachType,
 
+         @NotNull(
+                 message = "Payment details required"
+         )
+        PaymentRequest paymentDetails
         ) {
 }

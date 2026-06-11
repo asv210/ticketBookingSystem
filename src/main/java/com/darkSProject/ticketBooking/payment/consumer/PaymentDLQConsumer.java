@@ -13,11 +13,9 @@ public class PaymentDLQConsumer {
             queues =
                     RabbitMQConfig.PAYMENT_DLQ
     )
-
     public void handleFailedPayments(
             PaymentEventDTO event
     ) {
-
         log.error(
                 "Message moved to DLQ: {}",
                 event.ticketId()

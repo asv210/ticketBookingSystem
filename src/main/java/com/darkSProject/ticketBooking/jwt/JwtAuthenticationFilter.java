@@ -1,6 +1,9 @@
 package com.darkSProject.ticketBooking.jwt;
 
 import com.darkSProject.ticketBooking.auth.service.CustomUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
@@ -25,78 +28,90 @@ public class JwtAuthenticationFilter
 
     @Override
     protected void doFilterInternal(
-
             HttpServletRequest request,
-
             HttpServletResponse response,
-
             FilterChain filterChain
-
     ) throws ServletException, IOException {
 
-        final String authHeader =
-                request.getHeader("Authorization");
+        try {
 
-        final String jwtToken;
+            final String authHeader =
+                    request.getHeader("Authorization");
 
-        final String email;
+            if (authHeader == null ||
+                    !authHeader.startsWith("Bearer ")) {
 
-        if (
-                authHeader == null
-                        ||
-                        !authHeader.startsWith("Bearer ")
-        ) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String jwtToken =
+                    authHeader.substring(7);
+
+            String email =
+                    jwtService.extractEmail(jwtToken);
+
+            if (email != null &&
+                    SecurityContextHolder
+                            .getContext()
+                            .getAuthentication() == null) {
+
+                UserDetails userDetails =
+                        userDetailsService
+                                .loadUserByUsername(email);
+
+                if (jwtService.isTokenValid(
+                        jwtToken,
+                        userDetails.getUsername())) {
+
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
+                    );
+
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authToken);
+                }
+            }
 
             filterChain.doFilter(request, response);
 
-            return;
         }
+        catch (ExpiredJwtException ex) {
 
-        jwtToken = authHeader.substring(7);
-
-        email = jwtService.extractEmail(jwtToken);
-
-        if (
-                email != null
-                        &&
-                        SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                == null
-        ) {
-
-            UserDetails userDetails =
-                    userDetailsService
-                            .loadUserByUsername(email);
-
-            if (
-                    jwtService.isTokenValid(
-                            jwtToken,
-                            userDetails.getUsername()
-                    )
-            ) {
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-
-                                userDetails,
-
-                                null,
-
-                                userDetails.getAuthorities()
-                        );
-
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
-
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authToken);
-            }
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "JWT token has expired"
+            );
         }
+        catch (MalformedJwtException ex) {
 
-        filterChain.doFilter(request, response);
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid JWT token"
+            );
+        }
+        catch (SignatureException ex) {
+
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid JWT signature"
+            );
+        }
+        catch (Exception ex) {
+
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Authentication failed"
+            );
+        }
     }
 }

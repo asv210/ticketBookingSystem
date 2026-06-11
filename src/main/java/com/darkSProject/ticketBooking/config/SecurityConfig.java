@@ -1,5 +1,6 @@
 package com.darkSProject.ticketBooking.config;
 
+import com.darkSProject.ticketBooking.jwt.JwtAuthenticationEntryPoint;
 import com.darkSProject.ticketBooking.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
-
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter){
         http.csrf(csrf->csrf.disable())
@@ -20,6 +21,12 @@ public class SecurityConfig {
                                         SessionCreationPolicy.STATELESS
                                 )
                         )
+                .exceptionHandling(
+                        ex ->
+                                ex.authenticationEntryPoint(
+                                        jwtAuthenticationEntryPoint
+                                )
+                )
                         .authorizeHttpRequests(auth->auth
                         .requestMatchers(
                                 "/auth/**",

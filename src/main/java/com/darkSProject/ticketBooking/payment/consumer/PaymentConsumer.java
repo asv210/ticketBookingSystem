@@ -100,25 +100,39 @@ public class PaymentConsumer {
             );
 
         } catch (Exception ex) {
+
             int retryCount = 0;
 
-            if(xDeath != null && !xDeath.isEmpty()) {
+            if (xDeath != null && !xDeath.isEmpty()) {
 
-                retryCount =
-
-                        ((Long)
-                                xDeath.get(0)
-                                        .get("count"))
-                                .intValue();
+                retryCount = ((Long) xDeath.get(0)
+                        .get("count"))
+                        .intValue();
             }
-            if(retryCount >= 3) {
+
+            log.error(
+                    "Payment failed for ticket: {} Retry Count: {}",
+                    event.ticketId(),
+                    retryCount,
+                    ex
+            );
+
+            if (retryCount >= 3) {
 
                 log.error(
-                        "Max retries exceeded: {}",
+                        "Max retries exceeded for ticket {}",
                         event.ticketId()
                 );
 
-                // send to DLQ
+                paymentResultProducer.sendPaymentResult(
+
+                        PaymentResultEventDTO.builder()
+                                .ticketId(event.ticketId())
+                                .userId(event.userId())
+                                .eventId(UUID.randomUUID().toString())
+                                .success(false)
+                                .build()
+                );
 
                 channel.basicReject(
                         tag,
@@ -127,29 +141,15 @@ public class PaymentConsumer {
 
             } else {
 
-                // retry
-
                 channel.basicNack(
                         tag,
                         false,
                         false
                 );
             }
-
-            log.error(
-                    "Payment failed for ticket: {}",
-                    event.ticketId()
-            );
-
-
-            // SEND TO DLQ
-
             channel.basicNack(
-
                     tag,
-
                     false,
-
                     false
             );
         }
