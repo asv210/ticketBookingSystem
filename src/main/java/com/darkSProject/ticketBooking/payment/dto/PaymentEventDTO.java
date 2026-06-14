@@ -1,6 +1,5 @@
 package com.darkSProject.ticketBooking.payment.dto;
 
-import com.darkSProject.ticketBooking.payment.dto.paymentRequestDetails.*;
 import lombok.Builder;
 
 @Builder
@@ -16,16 +15,9 @@ public record PaymentEventDTO(
 
         PaymentMethod paymentMethod,
 
-        String currency,
+        PaymentProvider paymentProvider,
 
-        CardPaymentRequest cardDetails,
+        PaymentRequest paymentDetails
 
-        UpiPaymentRequest upiDetails,
-
-        WalletPaymentRequest walletDetails,
-
-        NetBankingPaymentRequest netBankingDetails,
-
-        PaypalPaymentRequest paypalDetails
 
 ) {}

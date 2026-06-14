@@ -1,47 +1,40 @@
 package com.darkSProject.ticketBooking.payment.service;
 
-import com.darkSProject.ticketBooking.payment.dto.PaymentMethod;
+import com.darkSProject.ticketBooking.common.exception.ErrorCode;
 import com.darkSProject.ticketBooking.common.exception.UnsupportedPaymentMethodException;
-import com.darkSProject.ticketBooking.payment.service.stretegy.PaymentStrategy;
+import com.darkSProject.ticketBooking.payment.dto.PaymentMethod;
+import com.darkSProject.ticketBooking.payment.service.stretegy.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @Component
+@RequiredArgsConstructor
 public class PaymentStrategyFactory {
 
-    private final Map<PaymentMethod,
-                PaymentStrategy> strategies;
-
-    public PaymentStrategyFactory(
-            List<PaymentStrategy> strategyList
-    ) {
-
-        strategies =
-                strategyList.stream()
-                        .collect(Collectors.toMap(
-                                PaymentStrategy::getSupportedMethod,
-                                Function.identity()
-                        ));
-    }
+    private final CardPaymentStrategy card;
+    private final UpiPaymentStrategy upi;
+    private final WalletPaymentStrategy wallet;
+    private final NetBankingPaymentStrategy netBanking;
 
     public PaymentStrategy getStrategy(
             PaymentMethod method
     ) {
-
-        PaymentStrategy strategy =
-                strategies.get(method);
-
-        if(strategy == null) {
-
+        if (method == null) {
             throw new UnsupportedPaymentMethodException(
-                    "Payment method not supported"
+                    "Payment method cannot be null",
+                    ErrorCode.UNSUPPORTED_PAYMENT_METHOD
             );
         }
 
-        return strategy;
+        return switch (method) {
+            case CARD -> card;
+            case UPI -> upi;
+            case WALLET -> wallet;
+            case NET_BANKING -> netBanking;
+            default -> throw new UnsupportedPaymentMethodException(
+                    "Payment method not supported",
+                    ErrorCode.UNSUPPORTED_PAYMENT_METHOD
+            );
+        };
     }
 }

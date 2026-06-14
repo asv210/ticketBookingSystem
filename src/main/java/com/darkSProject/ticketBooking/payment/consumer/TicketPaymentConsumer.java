@@ -1,6 +1,5 @@
 package com.darkSProject.ticketBooking.payment.consumer;
 
-import com.darkSProject.ticketBooking.payment.config.RabbitMQConfig;
 import com.darkSProject.ticketBooking.payment.dto.PaymentResultEventDTO;
 import com.darkSProject.ticketBooking.payment.entity.ProcessedEvent;
 import com.darkSProject.ticketBooking.payment.repository.ProcessEventRepository;
@@ -11,6 +10,7 @@ import com.darkSProject.ticketBooking.ticket.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 public class TicketPaymentConsumer {
     private final TicketRepository ticketRepository;
     private final ProcessEventRepository processEventRepository;
+
     @Transactional
     @RabbitListener(
             queues = "ticket_result_queue"
@@ -30,100 +31,78 @@ public class TicketPaymentConsumer {
             PaymentResultEventDTO event
     ) {
         log.info(
-                "Received payment result event: {}",
+                "Received payment result {}",
                 event
         );
-        // STEP 1
-        // check already processed
-        if(event.eventId() == null) {
 
-            log.error(
-                    "Received event with null eventId"
-            );
-
+        if(event.eventId() == null){
+            log.error("Null event id");
             return;
         }
 
-        boolean alreadyProcessed =
-
-                processEventRepository
-                        .existsById(
-                                event.eventId()
-                        );
-
-        if(alreadyProcessed) {
-
+        try {
+            processEventRepository.save(
+                    ProcessedEvent.builder()
+                            .eventId(event.eventId())
+                            .processedAt(LocalDateTime.now())
+                            .build()
+            );
+        } catch (DataIntegrityViolationException ex){
             log.info(
-                    "Duplicate event ignored: {}",
+                    "Duplicate event ignored {}",
                     event.eventId()
             );
-
             return;
         }
 
         Ticket ticket =
-                ticketRepository
-                        .findById(event.ticketId())
-                        .orElseThrow();
-        log.info(
-                "Ticket found: {}",
-                ticket.getTicketId()
-        );
-        if(event.success()) {
+                ticketRepository.findById(
+                        event.ticketId()
+                )
+                .orElse(null);
 
-            ticket.setStatus(
-                    TicketStatus.BOOKED
+        if(ticket == null){
+            log.error(
+                    "Ticket not found {}",
+                    event.ticketId()
             );
+            return;
+        }
 
-            ticket.getSeatBookings()
-                    .forEach(seatBooking ->
-
-                            seatBooking.setBookingStatus(
-                                    BookingStatus.BOOKED
-                            )
-                    );
-
+        if(ticket.getStatus() == TicketStatus.BOOKED
+                ||
+           ticket.getStatus() == TicketStatus.PAYMENT_FAILED){
             log.info(
-                    "Ticket confirmed: {}",
+                    "Ticket already finalized {}",
                     ticket.getTicketId()
             );
+            return;
+        }
 
-        } else {
-
-            ticket.setStatus(
-                    TicketStatus.PAYMENT_FAILED
-            );
-
-            ticket.getSeatBookings()
-                    .forEach(seatBooking ->
-
-                            seatBooking.setBookingStatus(
-                                    BookingStatus.PAYMENT_FAILED
-                            )
-                    );
+        try {
+            if(event.success()){
+                ticket.setStatus(TicketStatus.BOOKED);
+                ticket.getSeatBookings()
+                        .forEach(seat ->
+                                seat.setBookingStatus(BookingStatus.BOOKED)
+                        );
+            } else {
+                ticket.setStatus(TicketStatus.PAYMENT_FAILED);
+                ticket.getSeatBookings()
+                        .forEach(seat ->
+                                seat.setBookingStatus(BookingStatus.PAYMENT_FAILED)
+                        );
+            }
 
             log.info(
-                    "Payment failed: {}",
+                    "Ticket updated {}",
                     ticket.getTicketId()
+            );
+        } catch (Exception ex){
+            log.error(
+                    "Failed processing payment result",
+                    ex
             );
         }
-        processEventRepository.save(
-
-                ProcessedEvent.builder()
-
-                        .eventId(
-                                event.eventId()
-                        )
-
-                        .processedAt(
-                                LocalDateTime.now()
-                        )
-
-                        .build()
-        );
-        log.info(
-                "Ticket updated successfully"
-        );
-        log.info("END OF METHOD");
     }
 }

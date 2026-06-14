@@ -1,5 +1,6 @@
 package com.darkSProject.ticketBooking.payment.dto.paymentRequestDetails;
 
+import com.darkSProject.ticketBooking.payment.dto.CardType;
 import com.darkSProject.ticketBooking.payment.dto.PaymentRequest;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,4 +19,6 @@ public class CardPaymentRequest
     private String expiryYear;
 
     private String cvv;
+
+    private CardType cardType;
 }

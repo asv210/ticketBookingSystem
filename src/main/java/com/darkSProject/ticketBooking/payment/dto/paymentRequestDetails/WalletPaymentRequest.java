@@ -1,6 +1,7 @@
 package com.darkSProject.ticketBooking.payment.dto.paymentRequestDetails;
 
 import com.darkSProject.ticketBooking.payment.dto.PaymentRequest;
+import com.darkSProject.ticketBooking.payment.dto.WalletProvider;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,7 @@ import lombok.Setter;
 public class WalletPaymentRequest
         extends PaymentRequest {
 
-    private String walletProvider;
+    private WalletProvider walletProvider;
 
     private String walletId;
 }

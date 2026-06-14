@@ -1,8 +1,12 @@
 package com.darkSProject.ticketBooking.payment.gateway;
 
-import com.darkSProject.ticketBooking.payment.dto.PaymentRequestDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentRequest;
 import com.darkSProject.ticketBooking.payment.dto.PaymentResponseDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentStatus;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class MockPaymentGateway
@@ -10,17 +14,21 @@ public class MockPaymentGateway
 
     @Override
     public PaymentResponseDTO charge(
-            PaymentRequestDTO request
+            PaymentRequest request
     ) {
 
         boolean success =
-                request.amount() <= 5000;
+                request.getAmount() <= 5000;
 
         return PaymentResponseDTO.builder()
-                .success(success)
+                .paymentId(UUID.randomUUID().toString())
+                .status(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED)
                 .transactionId(
                         UUID.randomUUID().toString()
                 )
+                .gatewayReferenceId(UUID.randomUUID().toString())
+                .message(success ? "Payment successful" : "Payment failed")
+                .timestamp(LocalDateTime.now())
                 .build();
     }
 }

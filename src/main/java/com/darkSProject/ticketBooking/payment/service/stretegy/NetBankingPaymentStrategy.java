@@ -1,4 +1,40 @@
 package com.darkSProject.ticketBooking.payment.service.stretegy;
 
-public class NetBankingPaymentStrategy {
+import com.darkSProject.ticketBooking.payment.dto.PaymentEventDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentMethod;
+import com.darkSProject.ticketBooking.payment.dto.PaymentResultEventDTO;
+import com.darkSProject.ticketBooking.payment.dto.paymentRequestDetails.NetBankingPaymentRequest;
+import com.darkSProject.ticketBooking.payment.gateway.PaymentGateway;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class NetBankingPaymentStrategy implements PaymentStrategy {
+    private final PaymentGateway paymentGateway;
+
+    @Override
+    public PaymentResultEventDTO pay(
+            PaymentEventDTO event
+    ) {
+        NetBankingPaymentRequest netBankingPaymentRequest =
+                (NetBankingPaymentRequest) event.paymentDetails();
+
+        boolean success = paymentGateway.charge(netBankingPaymentRequest).status() ==
+                com.darkSProject.ticketBooking.payment.dto.PaymentStatus.SUCCESS;
+
+        return PaymentResultEventDTO.builder()
+                .ticketId(event.ticketId())
+                .userId(event.userId())
+                .eventId(UUID.randomUUID().toString())
+                .success(success)
+                .build();
+    }
+
+    @Override
+    public PaymentMethod getSupportedMethod() {
+        return PaymentMethod.NET_BANKING;
+    }
 }

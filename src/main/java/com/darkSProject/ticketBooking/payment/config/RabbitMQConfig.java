@@ -16,12 +16,12 @@ public class RabbitMQConfig  {
     public static final String PAYMENT_QUEUE =
             "payment_queue";
 
-    public static final String PAYMENT_RESULT_QUEUE =
-            "payment_result_queue";
-
     public static final String
             PAYMENT_RETRY_QUEUE =
             "payment_retry_queue";
+
+    public static final String NOTIFICATION_QUEUE =
+            "notification_queue";
     @Bean
     public Queue paymentQueue() {
 

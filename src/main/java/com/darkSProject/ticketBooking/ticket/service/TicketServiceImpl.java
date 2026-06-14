@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -131,6 +132,7 @@ public class TicketServiceImpl implements TicketService {
         paymentProducer.sendPaymentEvent(
 
                 PaymentEventDTO.builder()
+                        .eventId(UUID.randomUUID().toString())
                         .ticketId(
                                 savedTicket.getTicketId()
                         )
@@ -138,6 +140,9 @@ public class TicketServiceImpl implements TicketService {
                                 user.getUserId()
                         )
                         .amount(totalFare)
+                        .paymentMethod(request.paymentDetails().getPaymentMethod())
+                        .paymentProvider(request.paymentDetails().getPaymentProvider())
+                        .paymentDetails(request.paymentDetails())
                         .build()
         );
 

@@ -1,13 +1,13 @@
 package com.darkSProject.ticketBooking.payment.service.stretegy;
 
+import com.darkSProject.ticketBooking.payment.dto.PaymentEventDTO;
 import com.darkSProject.ticketBooking.payment.dto.PaymentMethod;
-import com.darkSProject.ticketBooking.payment.dto.PaymentRequest;
-import com.darkSProject.ticketBooking.payment.dto.PaymentResponseDTO;
+import com.darkSProject.ticketBooking.payment.dto.PaymentResultEventDTO;
 
 public interface PaymentStrategy {
 
-    PaymentResponseDTO processPayment(
-            PaymentRequest request
+    PaymentResultEventDTO pay(
+            PaymentEventDTO event
     );
 
     PaymentMethod getSupportedMethod();
